@@ -15,9 +15,9 @@ const int dtPin= 7; //the dt pin attach to pin 3
 int encoderVal = 4;
 int menu_pos;
 int last_menu;
-int encoder_button = 5;
-bool tracking_state = true;
-int direction_state = 1;
+int encoder_button = 5; // the pin the click of the encoder is linked to 
+bool tracking_state = true;  // this variable controls if the camera slider rotates or just does a traditional slider movement
+int direction_state = 1; // controls the default direction of the camera slider
 int temp;
 
 
@@ -30,12 +30,12 @@ uint16_t x_pos;
 uint16_t last_x;
 uint16_t last_y;
 
-int velocity = 300;
+int velocity = 300; // these are the default values you see on the screen when the camera slider boots up. 
 int objectX=50;
 int objectY=50;
 int currentX =0;
 int angle;
-float encoderMM = 33.8164;//32
+float encoderMM = 33.8164;// this is the encoder mm value. Configure this based on how many encoder counts equals too 1 mm of the slider movement. 
 int enc1;
 double servopos;
 int initial_servopos;
@@ -51,12 +51,8 @@ int initial_servopos;
 #ifdef U8X8_HAVE_HW_I2C
 #include <Wire.h>
 #endif
-U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
+U8G2_SH1106_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // this is the oled display I used. If you use a different U8G compatible screen, change this line
 
-//U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R0, /* clock=*/ 6, /* data=*/ 5, /* CS=*/ 4, /* reset=*/ 7);
-//U8GLIB_SH1106_128X64 u8g(U8G_I2C_OPT_NONE);  // I2C / TWI 
-//U8GLIB_SH1106_128X64 u8g(U8G_I2C_OPT_DEV_0|U8G_I2C_OPT_FAST); // Dev 0, Fast I2C / TWI
-//U8GLIB_SH1106_128X64 u8g(U8G_I2C_OPT_NO_ACK);
 
 int speedMenu = 5;
 
@@ -438,7 +434,7 @@ void config_menu()
   } 
 }
 
-void motor()
+void motor() // the function that controls all of the slider's movement. 
 {
   uint8_t status1;
   bool valid1;
@@ -459,8 +455,7 @@ void motor()
     Serial.print("distance");
     Serial.println(distance);
 
-    enc1 = roboclaw.ReadEncM2(address, &status1, &valid1);
-    //Serial.println(temp);
+    enc1 = roboclaw.ReadEncM2(address, &status1, &valid1); // these lines here take the current encoder value and calculate the inititial starting angle for the object tracking. If I didn't do this, the camera would rotate to its initial angle once the movement starts, this would lead to the starting of the recording being wasted.  
     double angle1 = atan2 ((objectY*10*encoderMM), temp); 
     angle1 =  (angle1 * 180)/3.14159265;
     initial_servopos = map(angle1, 180, 0, 0, 6000);
@@ -470,7 +465,7 @@ void motor()
     
     roboclaw.SpeedAccelDeccelPositionM1(address,10000,2000,10000,initial_servopos,1);
     
-    delay (3000);
+    delay (3000); // this delay gives the rotation motor time to move to the initial angle before the main movement starts. 
 
 
     int runVelocity = speedMenu*velocity;
